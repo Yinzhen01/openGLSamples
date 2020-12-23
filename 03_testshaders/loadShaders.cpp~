@@ -35,6 +35,7 @@ static void attachShader2Program(GLuint program, ShaderInfo& info)
 
 GLuint loadShaders(std::vector<ShaderInfo>& infos)
 {
+  static_assert(N);
   GLuint program = glCreateProgram();
   for (auto& info : infos)
   {
