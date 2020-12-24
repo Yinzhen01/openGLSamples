@@ -32,6 +32,9 @@ void Init()
   
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
   glEnableVertexAttribArray(0);
+
+  GLuint colorIndex = glGetUniformLocation(program, "color");
+  glUniform4f(colorIndex, 0.0f, 1.0f, 0.0f, 1.0f);
 }
 
 void Render()
