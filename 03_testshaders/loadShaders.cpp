@@ -8,57 +8,61 @@
 
 using namespace std;
 
-static void attachShader2Program(GLuint program, ShaderInfo& info)
+Shader::Shader(GLenum type, string filename)
+  : type(type), filename(filename)
 {
-  GLuint shader = glCreateShader(info.type);
-  string source = ReadAsciiFile(info.filename); 
+  index = glCreateShader(type);
+  string source = ReadAsciiFile(filename); 
   const char* strptr[] = {source.c_str()};
-  glShaderSource(shader, 1, strptr, NULL);
-  glCompileShader(shader);
+  glShaderSource(index, 1, strptr, NULL);
+  glCompileShader(index);
 
   GLint compileStatus;
-  glGetShaderiv(shader, GL_COMPILE_STATUS, &compileStatus);
+  glGetShaderiv(index, GL_COMPILE_STATUS, &compileStatus);
   if (!compileStatus)
   {
     GLint len = 0;
-    glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &len);
+    glGetShaderiv(index, GL_INFO_LOG_LENGTH, &len);
 
     vector<char> log(len+1);
-    glGetShaderInfoLog(shader, len, &len, &log[0]);
-    cerr << "shader compile error: " << &log[0] << endl;
-    exit(1);
-  }
-
-  glAttachShader(program, shader);
-  info.shader = shader;
+    glGetShaderInfoLog(index, len, &len, &log[0]);
+    cerr << filename <<": shader compile error: " << &log[0] << endl;
+  };
 }
 
-GLuint loadShaders(std::vector<ShaderInfo>& infos)
+ShadersProgram::ShadersProgram(const vector<ShaderInfo>& infos)
 {
-  GLuint program = glCreateProgram();
+  index = glCreateProgram();
   for (auto& info : infos)
   {
-    attachShader2Program(program, info);
+    Shader shader(info.type, info.filename);
+    glAttachShader(index, shader.ShaderIndex());
   }
 
-  glLinkProgram(program);
+  glLinkProgram(index);
   GLint linkStatus;
-  glGetProgramiv(program, GL_LINK_STATUS, &linkStatus);
+  glGetProgramiv(index, GL_LINK_STATUS, &linkStatus);
   if (!linkStatus)
   {
     GLint len = 0;
-    glGetProgramiv(program, GL_INFO_LOG_LENGTH, &len);
+    glGetProgramiv(index, GL_INFO_LOG_LENGTH, &len);
 
     vector<char> log(len+1);
-    glGetProgramInfoLog(program, len, &len, &log[0]);
+    glGetProgramInfoLog(index, len, &len, &log[0]);
     cerr << "program link error: " << &log[0] << endl;
     
-    for (auto& info : infos)
+    for (auto& shader:shaders)
     {
-      glDeleteShader(info.shader);
-      info.shader = 0;
+      glDeleteShader(shader.ShaderIndex());
     }
-    return 0;
   }
-  return program;
+
+}
+
+ShadersProgram::~ShadersProgram()
+{
+  for (auto& shader:shaders)
+  {
+    glDeleteShader(shader.ShaderIndex());
+  }
 }

@@ -23,18 +23,17 @@ void Init()
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
   
   vector<ShaderInfo> shaderInfo = {
-    {GL_VERTEX_SHADER, "vertex.shader", 0},
-    {GL_FRAGMENT_SHADER, "frag.shader", 0}
+    {GL_VERTEX_SHADER, "vertex.shader"},
+    {GL_FRAGMENT_SHADER, "frag.shader"}
   };
 
-  GLuint program = loadShaders(shaderInfo);
-  glUseProgram(program);
+  ShadersProgram shadersProgram(shaderInfo);
+  glUseProgram(shadersProgram.ProgramIndex());
   
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
   glEnableVertexAttribArray(0);
 
-  GLuint colorIndex = glGetUniformLocation(program, "color");
-  glUniform4f(colorIndex, 0.0f, 1.0f, 0.0f, 1.0f);
+  shadersProgram.linkUniformValues<4>("color", 0.0f, 1.0f, 0.0f, 1.0f);
 }
 
 void Render()
